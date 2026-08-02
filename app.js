@@ -4,47 +4,41 @@ async function checkServer() {
 
     try {
 
-        const response = await fetch("config.json");
+        const response = await fetch("./config.json?t=" + Date.now());
+
+        if (!response.ok) {
+            throw new Error("config.json not found");
+        }
 
         const config = await response.json();
 
-        if (!config.online) {
+        if (config.online !== true) {
 
             status.innerHTML = `
-
 <h2>🔴 Server Offline</h2>
 
-<p>
-This is not your fault.
-</p>
+<p>This is not your fault.</p>
 
-<p>
-Albert's server is currently OFF.
-</p>
+<p>Albert's server is currently OFF.</p>
 
-<p>
-Please contact Albert to turn it on.
-</p>
+<p>Please contact Albert to turn it on.</p>
 
 <button onclick="checkServer()">
-
 Retry
-
 </button>
-
 `;
 
             return;
-
         }
 
-        status.innerHTML =
-        "🟢 Server online.<br>Redirecting...";
+        status.innerHTML = `
+<h2>🟢 Server Online</h2>
+<p>Redirecting...</p>
+`;
 
         setTimeout(() => {
 
-            window.location.href =
-            config.server;
+            window.location.href = config.server;
 
         }, 1000);
 
@@ -52,16 +46,16 @@ Retry
 
     catch (error) {
 
-        status.innerHTML = `
+        console.error(error);
 
+        status.innerHTML = `
 <h2>Configuration Error</h2>
 
-<p>
+<p>${error.message}</p>
 
-Unable to read server configuration.
-
-</p>
-
+<button onclick="checkServer()">
+Retry
+</button>
 `;
 
     }
