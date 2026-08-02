@@ -1,71 +1,64 @@
-async function checkServer(){
+async function checkServer() {
 
-    const status =
-    document.getElementById("status");
+    const status = document.getElementById("status");
 
-    try{
+    try {
 
-        const config =
-        await fetch("config.json");
+        // Read the current Cloudflare URL
+        const configResponse = await fetch("config.json");
+        const config = await configResponse.json();
 
-        const data =
-        await config.json();
+        status.innerHTML = "Checking server...";
 
-        status.innerHTML =
-        "Checking server...";
-
-        const response =
-        await fetch(
-
-            data.server,
-
-            {
-
-                mode:"no-cors"
-
-            }
-
+        // Ask the APKStore if it is alive
+        const healthResponse = await fetch(
+            config.server + "/health"
         );
 
-        window.location.href =
-        data.server;
+        if (!healthResponse.ok) {
+            throw new Error("Server unavailable");
+        }
+
+        const health = await healthResponse.json();
+
+        if (health.online === true) {
+
+            status.innerHTML = "Server online.<br>Redirecting...";
+
+            setTimeout(() => {
+
+                window.location.href = config.server;
+
+            }, 1000);
+
+        } else {
+
+            throw new Error("Server offline");
+
+        }
 
     }
 
-    catch{
+    catch (error) {
 
-        status.innerHTML=
+        status.innerHTML = `
 
-        `
-
-<h2>
-
-Server Offline
-
-</h2>
+<h2>Server Offline</h2>
 
 <p>
-
 This is not your fault.
-
 </p>
 
 <p>
-
 Albert's server is currently OFF.
-
 </p>
 
 <p>
-
-Please contact Albert and try again later.
-
+Please contact Albert to turn it on.
 </p>
 
 <button onclick="location.reload()">
-
 Retry
-
 </button>
 
 `;
