@@ -4,56 +4,13 @@ async function checkServer() {
 
     try {
 
-        // Read the current Cloudflare URL
-        const configResponse = await fetch("config.json");
-        const config = await configResponse.json();
+        const response = await fetch("config.json");
 
-        status.innerHTML = "Checking server...";
+        const config = await response.json();
 
-        // Check the APK Store health endpoint
-        const healthResponse = await fetch(
-            config.server + "/health",
-            {
-                cache: "no-store"
-            }
-        );
+        if (!config.online) {
 
-        // Make sure we actually got JSON back
-        const contentType =
-            healthResponse.headers.get("content-type") || "";
-
-        if (
-            !healthResponse.ok ||
-            !contentType.includes("application/json")
-        ) {
-
-            throw new Error("Server unavailable");
-
-        }
-
-        const health = await healthResponse.json();
-
-        if (health.online !== true) {
-
-            throw new Error("Server unavailable");
-
-        }
-
-        status.innerHTML = "🟢 Server online.<br>Redirecting...";
-
-        setTimeout(() => {
-
-            window.location.href = config.server;
-
-        }, 1000);
-
-    }
-
-    catch (error) {
-
-        console.error(error);
-
-        status.innerHTML = `
+            status.innerHTML = `
 
 <h2>🔴 Server Offline</h2>
 
@@ -74,6 +31,36 @@ Please contact Albert to turn it on.
 Retry
 
 </button>
+
+`;
+
+            return;
+
+        }
+
+        status.innerHTML =
+        "🟢 Server online.<br>Redirecting...";
+
+        setTimeout(() => {
+
+            window.location.href =
+            config.server;
+
+        }, 1000);
+
+    }
+
+    catch (error) {
+
+        status.innerHTML = `
+
+<h2>Configuration Error</h2>
+
+<p>
+
+Unable to read server configuration.
+
+</p>
 
 `;
 
