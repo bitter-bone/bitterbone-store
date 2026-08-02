@@ -1,4 +1,11 @@
+<<<<<<< HEAD
+{
+    "server": "https://holiday-karaoke-sponsorship-recruiting.trycloudflare.com",
+    "online": false
+}
+=======
 {
     "server": "https://holiday-karaoke-sponsorship-recruiting.trycloudflare.com",
     "online": true
 }
+>>>>>>> a1aa41d9fe5c9bd36f4a417b75c25c4c76b850e4
