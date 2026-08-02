@@ -10,40 +10,52 @@ async function checkServer() {
 
         status.innerHTML = "Checking server...";
 
-        // Ask the APKStore if it is alive
+        // Check the APK Store health endpoint
         const healthResponse = await fetch(
-            config.server + "/health"
+            config.server + "/health",
+            {
+                cache: "no-store"
+            }
         );
 
-        if (!healthResponse.ok) {
+        // Make sure we actually got JSON back
+        const contentType =
+            healthResponse.headers.get("content-type") || "";
+
+        if (
+            !healthResponse.ok ||
+            !contentType.includes("application/json")
+        ) {
+
             throw new Error("Server unavailable");
+
         }
 
         const health = await healthResponse.json();
 
-        if (health.online === true) {
+        if (health.online !== true) {
 
-            status.innerHTML = "Server online.<br>Redirecting...";
-
-            setTimeout(() => {
-
-                window.location.href = config.server;
-
-            }, 1000);
-
-        } else {
-
-            throw new Error("Server offline");
+            throw new Error("Server unavailable");
 
         }
+
+        status.innerHTML = "🟢 Server online.<br>Redirecting...";
+
+        setTimeout(() => {
+
+            window.location.href = config.server;
+
+        }, 1000);
 
     }
 
     catch (error) {
 
+        console.error(error);
+
         status.innerHTML = `
 
-<h2>Server Offline</h2>
+<h2>🔴 Server Offline</h2>
 
 <p>
 This is not your fault.
@@ -57,8 +69,10 @@ Albert's server is currently OFF.
 Please contact Albert to turn it on.
 </p>
 
-<button onclick="location.reload()">
+<button onclick="checkServer()">
+
 Retry
+
 </button>
 
 `;
